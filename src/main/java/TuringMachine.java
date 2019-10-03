@@ -24,6 +24,7 @@ public class TuringMachine {
         }
      }
 
+     //подключение к БД в конструкторе состояния
     private abstract class State{
         public abstract State execute_rules(Head head);
         @Override
