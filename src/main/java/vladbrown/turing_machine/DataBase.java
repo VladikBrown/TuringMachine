@@ -47,18 +47,28 @@ public class DataBase {
     }
 // return state
 
-    public String getNextState(String currentState, String currentSymbol) throws SQLException {
+    public String stringGetNextState(String currentState, String currentSymbol) throws SQLException {
 
         return getDataFromDB(currentState, currentSymbol, "next_state");
 
     }
 
-    public TuringMachine.State stringGetNextState(String currentState, String currentSymbol) throws SQLException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-        String rawState = getNextState(currentState, currentSymbol);
+    public TuringMachine.State getNextState(String currentState, String currentSymbol) throws SQLException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        String rawState = stringGetNextState(currentState, currentSymbol);
         switch (rawState){
             case "q0": {
-                return new TuringMachine.State_0()
+                return new TuringMachine.State_0();
             }
+            case "q1": {
+                return new TuringMachine.State_1();
+            }
+            case "q2": {
+                return new TuringMachine.State_2();
+            }
+            case "q3": {
+                return new TuringMachine.State_3();
+            }
+            default: return new TuringMachine.State_0();
         }
     }
 
@@ -72,7 +82,7 @@ public class DataBase {
             processedDirection = "move to the Right";
         }
         String processedRule = "If current state is " + currentState + "and current symbol is " + currentSymbol +
-                "then head should " + processedDirection + " and go into the State: " + getNextState(currentState, currentSymbol);
+                "then head should " + processedDirection + " and go into the State: " + stringGetNextState(currentState, currentSymbol);
         return  processedRule;
     }
 

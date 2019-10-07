@@ -68,24 +68,11 @@ public class TuringMachine {
         public State execute_rules(Head head, String currentState) throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
             // состояния из БД брать
                 head.move(dataBase.getDirection(this.toString(), head.current_element.symbol));
-                //return dataBase.getNextState(this.toString(), head.current_element.symbol);
+                return dataBase.getNextState(this.toString(), head.current_element.symbol);
             //1. Действие
             //2.Направлеие
             // 3.Состояние
 
-
-
-            if(head.current_value() == "R"){
-                return new State_0();
-            }
-            if(head.current_value() == "("){
-                head.move("R");
-                return new State_2();
-            } else if(head.current_value() == ")"){
-                head.move("R");
-                return new State_1();
-            }
-            return null;
         }
 
         @Override
@@ -100,13 +87,10 @@ public class TuringMachine {
         }
 
         @Override
-        public State execute_rules(Head head, String currentState) {
-
-            switch (next_state)
-            {
-
-            }
-           return null;
+        public State execute_rules(Head head, String currentState) throws SQLException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
+            //действие
+            head.move(dataBase.getDirection(this.toString(), head.current_element.symbol));
+            return dataBase.getNextState(this.toString(), head.current_element.symbol);
         }
 
         @Override
@@ -119,15 +103,16 @@ public class TuringMachine {
         public State_3() throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
         }
 
+        private void specialRules(Head head){
+            head.clear();
+            head.move("Right");
+            head.clear();
+            head.move("Right");
+        }
         @Override
         public State execute_rules(Head head, String currentState) throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
-            head.clear();
-            head.move("L");
-            head.clear();
-            head.move("R");
-            head.move("R");
-            head.move("R");
-            return new State_1();
+            specialRules(head);
+            return dataBase.getNextState(this.toString(), head.current_element.symbol);
         }
 
         @Override
