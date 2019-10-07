@@ -43,7 +43,8 @@ public class TuringMachine {
 
         @Override
         public State execute_rules(Head head, String currentState) throws SQLException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-            if(head.it.hasNext()){  head.move("Right");//(dataBase.getDirection(currentState, head.current_element.symbol));
+            if(head.it.hasNext()){
+                head.move("Right");
                 return new State_1();
             }
             else {
@@ -67,8 +68,8 @@ public class TuringMachine {
         @Override
         public State execute_rules(Head head, String currentState) throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
             // состояния из БД брать
-                head.move(dataBase.getDirection(this.toString(), head.current_element.symbol));
-                return dataBase.getNextState(this.toString(), head.current_element.symbol);
+                head.move(dataBase.getDirection(this.toString(), head.current_element.getValue()));
+                return dataBase.getNextState(this.toString(), head.current_element.getValue());
             //1. Действие
             //2.Направлеие
             // 3.Состояние
@@ -89,8 +90,8 @@ public class TuringMachine {
         @Override
         public State execute_rules(Head head, String currentState) throws SQLException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
             //действие
-            head.move(dataBase.getDirection(this.toString(), head.current_element.symbol));
-            return dataBase.getNextState(this.toString(), head.current_element.symbol);
+            head.move(dataBase.getDirection(this.toString(), head.current_element.getValue()));
+            return dataBase.getNextState(this.toString(), head.current_element.getValue());
         }
 
         @Override
@@ -112,7 +113,7 @@ public class TuringMachine {
         @Override
         public State execute_rules(Head head, String currentState) throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
             specialRules(head);
-            return dataBase.getNextState(this.toString(), head.current_element.symbol);
+            return dataBase.getNextState(this.toString(), head.current_element.getValue());
         }
 
         @Override
@@ -161,15 +162,16 @@ public class TuringMachine {
             this.it = tape.listIterator(0);
             File file;
             Scanner scanner = null;
-            char [] raw_tape = new char[0];
+            String raw_tape = "";
             try {
                 file = new File(path);
                 scanner = new Scanner(file);
-                //  логика чтения из файла
+
                 while(scanner.hasNext()){
-                    raw_tape = scanner.nextLine().toCharArray();
+                    raw_tape = scanner.nextLine();
                 }
-                for (char x: raw_tape) {
+
+                for (String x: raw_tape.split("", raw_tape.length())) {
                     this.tape.add(new Box(x));
                 }
             }
@@ -181,7 +183,7 @@ public class TuringMachine {
                 scanner.close();
             }
         }
-            //сброс итератора для работы машины, во избяжения исключения конкурентыных модификаций
+            //сброс итератора для работы машины, во избежение исключения конкурентыных модификаций
             this.it = tape.listIterator(0);
         }
     public void showTape(){
