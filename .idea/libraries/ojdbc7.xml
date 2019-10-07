@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="ojdbc7">
+    <CLASSES>
+      <root url="jar://C:/MySQL Driver/ojdbc7.jar!/" />
+      <root url="jar://C:/MySQL Driver/mysql-connector-java-8.0.17.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

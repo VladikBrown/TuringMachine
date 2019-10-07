@@ -2,6 +2,8 @@
   <library name="mysql-connector-java-8.0.17">
     <CLASSES>
       <root url="jar://C:/MySQL Driver/mysql-connector-java-8.0.17.jar!/" />
+      <root url="jar://C:/MySQL Driver/Microsoft JDBC Driver 6.0 for SQL Server/sqljdbc_6.0/rus/jre8/sqljdbc42.jar!/" />
+      <root url="jar://C:/MySQL Driver/ojdbc7.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

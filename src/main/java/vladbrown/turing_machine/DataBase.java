@@ -1,3 +1,5 @@
+package vladbrown.turing_machine;
+
 import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
 import java.util.Scanner;
@@ -7,7 +9,7 @@ public class DataBase {
     private Connection connection;
     private String URL, userName, password;
     private boolean isConnectable = false;
-    public DataBase(String URL, String userName, String password) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    public DataBase(String URL, String userName, String password) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, SQLException {
         this.URL = URL;
         this.userName = userName;
         this.password = password;
@@ -43,18 +45,30 @@ public class DataBase {
     public String getDirection(String currentState, String currentSymbol) throws SQLException {
         return getDataFromDB(currentState, currentSymbol, "direction");
     }
+// return state
 
     public String getNextState(String currentState, String currentSymbol) throws SQLException {
+
         return getDataFromDB(currentState, currentSymbol, "next_state");
+
+    }
+
+    public TuringMachine.State stringGetNextState(String currentState, String currentSymbol) throws SQLException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        String rawState = getNextState(currentState, currentSymbol);
+        switch (rawState){
+            case "q0": {
+                return new TuringMachine.State_0()
+            }
+        }
     }
 
     public String getRule(String currentState, String currentSymbol) throws SQLException {
         //можно заменить лямбдой???
         String processedDirection = "remain in place";
-        if(getDirection(currentState, currentSymbol) == "L"){
+        if(getDirection(currentState, currentSymbol) == "Left"){
             processedDirection = "move to the Left";
         }
-        else if (getDirection(currentState, currentSymbol) == "R"){
+        else if (getDirection(currentState, currentSymbol) == "Right"){
             processedDirection = "move to the Right";
         }
         String processedRule = "If current state is " + currentState + "and current symbol is " + currentSymbol +
@@ -86,8 +100,31 @@ public class DataBase {
             preparedStatement.setString(2, current_symbol);
             preparedStatement.setString(3, next_state);
             preparedStatement.setString(4, direction);
+            preparedStatement.executeUpdate();
         }
-        System.out.println("Данные были успешно добавлены");
+        System.out.println("Data has been successfully added\n");
+    }
+
+    public void removeRule(int numberOfRule) throws SQLException {
+        if(isConnectable){
+            connection = DriverManager.getConnection(URL, userName, password);
+            PreparedStatement preparedStatement = connection.prepareStatement("delete from turing_machine_rules.rules where row_count = ?");
+            preparedStatement.setInt(1, numberOfRule);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    public void changeRule(int numberOfRule, String newCurrentState, String newCurrentValue, String newNextValue, String newDirection) throws SQLException {
+        if(isConnectable){
+            connection = DriverManager.getConnection(URL, userName, password);
+            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE turing_machine_rules.rules where row_count  = ? SET current_state = ?, current_value = ?, next_state = ?, direction ?");
+            preparedStatement.setInt(1, numberOfRule);
+            preparedStatement.setString(2, newCurrentState);
+            preparedStatement.setString(3, newCurrentValue);
+            preparedStatement.setString(4, newNextValue);
+            preparedStatement.setString(5, newDirection);
+            preparedStatement.executeUpdate();
+        }
     }
 
     public void showRules() throws SQLException {
@@ -99,8 +136,9 @@ public class DataBase {
             while (resultSet.next()){
                 System.out.print(index++ + ". ");
                 for (int i = 1; i <= 4; i++){
-                System.out.print(resultSet.getString(i) + "\t");
+                    System.out.print(resultSet.getString(i) + "\t");
                 }
+                System.out.println("\n");
             }
         }
     }

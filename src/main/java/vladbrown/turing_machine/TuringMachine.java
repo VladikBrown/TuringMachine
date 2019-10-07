@@ -1,11 +1,9 @@
+package vladbrown.turing_machine;
+
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Scanner;
@@ -14,27 +12,38 @@ import java.util.Scanner;
 public class TuringMachine {
 
 
-    public void start(String args) throws FileNotFoundException {
+    public void start(String args) throws FileNotFoundException, NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
         Tape tape = new Tape(args); //args[0];
         Head head = new Head(tape);
         State current_state = new State_0(); // while current_state != null ???
         while(current_state != null) {
-            current_state = current_state.execute_rules(head);
+            current_state = current_state.execute_rules(head, current_state.toString());
             tape.showTape();
         }
      }
 
      //подключение к БД в конструкторе состояния
-    private abstract class State{
-        public abstract State execute_rules(Head head);
+    static abstract class State{
+
+        protected DataBase dataBase;
+
+        public State() throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
+            dataBase = new DataBase("jdbc:mysql://localhost:3306/turing_machine_rules?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", "root", "9098");
+        }
+        public abstract State execute_rules(Head head, String currentState) throws SQLException, NoSuchMethodException, IllegalAccessException, InstantiationException, InvocationTargetException, ClassNotFoundException;
+
         @Override
         public abstract String toString();
     }
 
-    private class State_0 extends State{
+    static class State_0 extends State{
+        public State_0() throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
+            super();
+        }
+
         @Override
-        public State execute_rules(Head head) {
-            if(head.it.hasNext()){  head.move("R");
+        public State execute_rules(Head head, String currentState) throws SQLException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+            if(head.it.hasNext()){  head.move("Right");//(dataBase.getDirection(currentState, head.current_element.symbol));
                 return new State_1();
             }
             else {
@@ -48,18 +57,31 @@ public class TuringMachine {
         }
     }
 
-    private class State_1 extends State{
+    //через switch
+    static class State_1 extends State{
+
+        public State_1() throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
+        super();
+        }
 
         @Override
-        public State execute_rules(Head head) {
+        public State execute_rules(Head head, String currentState) throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
             // состояния из БД брать
-            if(head.current_value() == 'A'){
+                head.move(dataBase.getDirection(this.toString(), head.current_element.symbol));
+                //return dataBase.getNextState(this.toString(), head.current_element.symbol);
+            //1. Действие
+            //2.Направлеие
+            // 3.Состояние
+
+
+
+            if(head.current_value() == "R"){
                 return new State_0();
             }
-            if(head.current_value() == '('){
+            if(head.current_value() == "("){
                 head.move("R");
                 return new State_2();
-            } else if(head.current_value() == ')'){
+            } else if(head.current_value() == ")"){
                 head.move("R");
                 return new State_1();
             }
@@ -72,20 +94,18 @@ public class TuringMachine {
         }
     }
 
-    private class State_2 extends State{
+    static class State_2 extends State{
+        public State_2() throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
+            super();
+        }
+
         @Override
-        public State execute_rules(Head head) {
-           if(head.current_value() == 'A'){
-               return new State_0();
-           }
-           if(head.current_value() == '('){
-               head.move("R");
-               return new State_2();
-           }
-           else if(head.current_value() == ')'){
-               head.move("L");
-               return new State_3();
-           }
+        public State execute_rules(Head head, String currentState) {
+
+            switch (next_state)
+            {
+
+            }
            return null;
         }
 
@@ -95,9 +115,12 @@ public class TuringMachine {
         }
     }
 
-    private class State_3 extends State{
+    static class State_3 extends State{
+        public State_3() throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
+        }
+
         @Override
-        public State execute_rules(Head head) {
+        public State execute_rules(Head head, String currentState) throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
             head.clear();
             head.move("L");
             head.clear();
@@ -115,19 +138,19 @@ public class TuringMachine {
 
     private class Box {
 
-        private char symbol;
+        private String symbol;
 
-        public Box(char symbol) {
+        public Box(String symbol) {
             this.symbol = symbol;
 
         }
 
-        public char getValue() {
+        public String getValue() {
             return this.symbol;
 
         }
 
-        public void setValue(char symbol) {
+        public void setValue(String symbol) {
             this.symbol = symbol;
         }
 
@@ -227,17 +250,17 @@ public class TuringMachine {
         }
 
 
-        private void change(char new_symbol){
+        private void change(String new_symbol){
             this.it.set(new Box(new_symbol));
                     //спросить про утечку памяти
         }
 
         private void clear(){
 
-            this.it.set(new Box('.'));
+            this.it.set(new Box("."));
         }
 
-        private char current_value(){
+        private String current_value(){
             return this.current_element.getValue();
         }
 
