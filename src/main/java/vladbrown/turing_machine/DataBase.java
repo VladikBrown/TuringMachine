@@ -5,6 +5,9 @@ import java.sql.*;
 import java.util.Scanner;
 
 //rename
+/*
+
+ */
 public class DataBase {
     private Connection connection;
     private String URL, userName, password;
@@ -17,7 +20,7 @@ public class DataBase {
         try (Connection connection = DriverManager.getConnection(URL, userName, password);
              Statement statement = connection.createStatement()) {
             Statement st = connection.createStatement();
-            System.out.println("DB is connected");
+            //System.out.println("DB is connected");
             this.connection = connection;
             this.isConnectable = true;
             st.close();
@@ -27,29 +30,40 @@ public class DataBase {
 
     }
 
-    private String getDataFromDB(String currentState, String currentSymbol, String typeOfData) throws SQLException {
+
+    public String getDirection(String currentState, String currentSymbol) throws SQLException {
         if (isConnectable) {
             connection = DriverManager.getConnection(URL, userName, password);
-            PreparedStatement preparedStatement = connection.prepareStatement("select ? from turing_machine_rules.rules where current_state = ? and current_value = ?");
-            preparedStatement.setString(1, typeOfData);
-            preparedStatement.setString(2, currentState);
-            preparedStatement.setString(3, currentSymbol);
+            PreparedStatement preparedStatement = connection.prepareStatement("select direction from turing_machine_rules.rules where current_state = ? and current_value = ?");
+            preparedStatement.setString(1, currentState);
+            preparedStatement.setString(2, currentSymbol);
             ResultSet resultSet = preparedStatement.executeQuery();
-            return resultSet.toString();
+            if (resultSet.next()) {
+                return resultSet.getString("direction");
+            }
+            return null;
         }
         else {
             return null;
         }
     }
-
-    public String getDirection(String currentState, String currentSymbol) throws SQLException {
-        return getDataFromDB(currentState, currentSymbol, "direction");
-    }
 // return state
 
     public String stringGetNextState(String currentState, String currentSymbol) throws SQLException {
-
-        return getDataFromDB(currentState, currentSymbol, "next_state");
+        if (isConnectable) {
+            connection = DriverManager.getConnection(URL, userName, password);
+            PreparedStatement preparedStatement = connection.prepareStatement("select next_state from turing_machine_rules.rules where current_state = ? and current_value = ?");
+            preparedStatement.setString(1, currentState);
+            preparedStatement.setString(2, currentSymbol);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getString("next_state");
+            }
+            return null;
+        }
+        else {
+            return null;
+        }
 
     }
 
@@ -68,7 +82,7 @@ public class DataBase {
             case "q3": {
                 return new TuringMachine.State_3();
             }
-            default: return new TuringMachine.State_0();
+            default: return null;
         }
     }
 
