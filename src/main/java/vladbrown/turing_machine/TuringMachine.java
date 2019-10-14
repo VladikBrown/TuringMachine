@@ -17,12 +17,23 @@ import java.util.Scanner;
 * @version 0.5
  */
 public class TuringMachine {
+    private static DataBase dataBase;
+    private boolean wasLogGiven = false;
+    private String textFolder;
+
+    public TuringMachine(String[] args) throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
+        DataBase dataBase = new DataBase("jdbc:mysql://localhost:3306/turing_machine_rules?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", "root", "9098");
+        this.textFolder = args[0];
+        if(args[1].equals("-log")){ this.wasLogGiven = true;}
+    }
 
     /*Метод Start реализует интерфейс взаимодействия с машиной Тьюринга
     *@param    args    директория текстового файла и "начальным" машины тьюринга
+    *
     */
-    public void start(String args) throws FileNotFoundException, NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
-            int menuIndex = 0;
+
+    public void start(String textFolder) throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
+            int menuIndex;
             outer:
             while(true){
                 System.out.println(
@@ -38,28 +49,28 @@ public class TuringMachine {
                 menuIndex = in.nextInt();
                 switch (menuIndex){
                     case 1: {
-                        Tape tape = new Tape(args); //args[0];
+                        Tape tape = new Tape(textFolder);
                         tape.showTape();
                         Head head = new Head(tape);
-                        State current_state = new State_0(); // while current_state != null ???
+                        State current_state = new State_0();
                         while(current_state != null) {
+                            if(this.wasLogGiven){
+                                System.out.println(current_state.toString());
+                            }
                             current_state = current_state.execute_rules(head, current_state.toString());
                         }
                         tape.showTape();
                         break;
                     }
                     case 2: {
-                        DataBase dataBase = new DataBase("jdbc:mysql://localhost:3306/turing_machine_rules?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", "root", "9098");;
                         dataBase.showRules();
                         break;
                     }
                     case 3: {
-                        DataBase dataBase = new DataBase("jdbc:mysql://localhost:3306/turing_machine_rules?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", "root", "9098");;
                         dataBase.insertRule();
                         break;
                     }
                     case 4: {
-                        DataBase dataBase = new DataBase("jdbc:mysql://localhost:3306/turing_machine_rules?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", "root", "9098");;
                         dataBase.showRules();
                         System.out.println("Enter number of rule to change");
                         int ruleToChange = in.nextInt();
@@ -76,7 +87,6 @@ public class TuringMachine {
                         break;
                     }
                     case 5: {
-                        DataBase dataBase = new DataBase("jdbc:mysql://localhost:3306/turing_machine_rules?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", "root", "9098");;
                         dataBase.showRules();
                         System.out.println("Enter number of rule to remove");
                         int ruleToRemove = in.nextInt();
@@ -85,7 +95,7 @@ public class TuringMachine {
                         break;
                     }
                     case 6: {
-                        Tape tape = new Tape(args); //args[0];
+                        Tape tape = new Tape(textFolder);
                         tape.showTape();
                         break;
                     }
@@ -94,7 +104,6 @@ public class TuringMachine {
                     }
                 }
             }
-
      }
 
      //подключение к БД в конструкторе состояния
@@ -104,11 +113,6 @@ public class TuringMachine {
      */
     static abstract class State{
 
-        protected DataBase dataBase;
-
-        public State() throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
-            dataBase = new DataBase("jdbc:mysql://localhost:3306/turing_machine_rules?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", "root", "9098");
-        }
         public abstract State execute_rules(Head head, String currentState) throws SQLException, NoSuchMethodException, IllegalAccessException, InstantiationException, InvocationTargetException, ClassNotFoundException;
 
         @Override
@@ -119,12 +123,9 @@ public class TuringMachine {
 
      */
     static class State_0 extends State{
-        public State_0() throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
-            super();
-        }
 
         @Override
-        public State execute_rules(Head head, String currentState) throws SQLException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        public State execute_rules(Head head, String currentState) {
             if(head.current_element == null && head.it.hasNext()){
                 head.move("Right");
                 return this;
@@ -136,7 +137,6 @@ public class TuringMachine {
             else {
                 return null;
             }
-
         }
 
         @Override
@@ -150,22 +150,12 @@ public class TuringMachine {
      */
     static class State_1 extends State{
 
-        public State_1() throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
-        super();
-        }
-
         @Override
         public State execute_rules(Head head, String currentState) throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
-            // состояния из БД брать
-                String curElement = head.current_element.getValue();
+                String currentElement = head.current_element.getValue();
                 head.move(dataBase.getDirection(this.toString(), head.current_element.getValue()));
 
-            //вернуть предыдуший элемент
-                return dataBase.getNextState(this.toString(), curElement);
-            //1. Действие
-            //2.Направлеие
-            // 3.Состояние
-
+                return dataBase.getNextState(this.toString(), currentElement);
         }
 
         @Override
@@ -178,16 +168,12 @@ public class TuringMachine {
 
      */
     static class State_2 extends State{
-        public State_2() throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
-            super();
-        }
 
         @Override
         public State execute_rules(Head head, String currentState) throws SQLException, ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-            //действие
-            String curElement = head.current_element.getValue();
+            String currentElement = head.current_element.getValue();
             head.move(dataBase.getDirection(this.toString(), head.current_element.getValue()));
-            return dataBase.getNextState(this.toString(),curElement);
+            return dataBase.getNextState(this.toString(),currentElement);
         }
 
         @Override
@@ -200,8 +186,6 @@ public class TuringMachine {
 
      */
     static class State_3 extends State{
-        public State_3() throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
-        }
 
         private void specialRules(Head head){
             head.clear();
@@ -225,18 +209,16 @@ public class TuringMachine {
     /*
 
      */
-    private class Box {
+    private static class Box {
 
         private String symbol;
 
-        public Box(String symbol) {
+        Box(String symbol) {
             this.symbol = symbol;
-
         }
 
         public String getValue() {
             return this.symbol;
-
         }
 
         public void setValue(String symbol) {
@@ -257,13 +239,7 @@ public class TuringMachine {
         private LinkedList<Box> tape;
         private ListIterator<Box> it;
 
-        public Tape(){
-            this.tape = new LinkedList<>();
-            this.it = tape.listIterator(0);
-        }
-
-        public Tape(String path) {
-            // сделать заполнение из файла
+        Tape(String path) {
             this.tape = new LinkedList<>();
             this.it = tape.listIterator(0);
             File file;
@@ -289,9 +265,9 @@ public class TuringMachine {
                 scanner.close();
             }
         }
-            //сброс итератора для работы машины, во избежение исключения конкурентыных модификаций
             this.it = tape.listIterator(0);
         }
+
     public void showTape(){
         for (Box x: this.tape) {
             System.out.print(x);
@@ -308,7 +284,7 @@ public class TuringMachine {
         private ListIterator<Box> it;
         private Box current_element;
 
-        public Head(Tape object_Tape)
+        Head(Tape object_Tape)
         {
             this.it = object_Tape.it;
         }
@@ -323,6 +299,7 @@ public class TuringMachine {
                 }
                 else System.out.println("Head in the extreme left position!");
             }
+
             if(direction.equals("Right"))
             {
                 if(this.it.hasNext()) {
@@ -337,20 +314,11 @@ public class TuringMachine {
             }
         }
 
-        private void print() {
-
-
-            System.out.print(this.it);
-        }
-
-
         private void change(String new_symbol){
             this.it.set(new Box(new_symbol));
-                    //спросить про утечку памяти
         }
 
         private void clear(){
-
             this.it.set(new Box("."));
         }
 
