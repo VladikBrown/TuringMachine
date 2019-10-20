@@ -4,9 +4,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
 import java.util.Scanner;
 
-//rename
-/*
-
+/**
+* Класс {@link DataBase} позволяет взаимодействовать с таблицей правил для машины Тьюринга,
+* которые хрянятся в базе данных.
+* Поля класса хранят запросы к базе данных и имена полей для более просто взаимодействия между машиной и базой данных.
  */
 public class DataBase {
     private static final String SELECT_DIRECTION = "select direction from turing_machine_rules.rules where current_state = ? and current_value = ?";
@@ -29,7 +30,19 @@ public class DataBase {
     private Connection connection;
     private String URL, userName, password;
     private boolean isConnectable = false;
-    public DataBase(String URL, String userName, String password) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, SQLException {
+
+    /**
+    *Устанавливается соединение с базой данных.
+    *@param     URL     Адрес базы данных с таблицой правил.
+    *@param     userName    Имя пользователя.
+    *@param     password    Пароль от базы данных.
+     * @throws   ClassNotFoundException    Исключение для подключения к базе данных.
+     * @throws   NoSuchMethodException     Исключение для подключения к базе данных.
+     * @throws   IllegalAccessException    Исключение для подключения к базе данных.
+     * @throws   InvocationTargetException    Исключение для подключения к базе данных.
+     * @throws   InstantiationException     Исключение для подключения к базе данных.
+     */
+    public DataBase(String URL, String userName, String password) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         this.URL = URL;
         this.userName = userName;
         this.password = password;
@@ -47,6 +60,12 @@ public class DataBase {
     }
 
 
+    /**
+    *@param    currentState    Текущее состояние машины Тьюринга.
+    *@param    currentSymbol   Текущий символ на ленте машины Тьюринга.
+    *@return   Строковое значение направления следующего шага каретки.
+     * @throws   SQLException    Исключение, обрабатываещее ошибки с подключением к базе данных.
+     */
     public String getDirection(String currentState, String currentSymbol) throws SQLException {
         if (isConnectable) {
             connection = DriverManager.getConnection(URL, userName, password);
@@ -64,6 +83,12 @@ public class DataBase {
         }
     }
 
+    /**
+     *@param    currentState    Текущее состояние машины Тьюринга.
+     *@param    currentSymbol   Текущий символ на ленте машины Тьюринга.
+     *@return   Строковое значение следующего состояния, в которое должна перейти машина Тьюринга.
+     *@throws   SQLException    Исключение, обрабатываещее ошибки с подключением к базе данных.
+     */
     public String stringGetNextState(String currentState, String currentSymbol) throws SQLException {
         if (isConnectable) {
             connection = DriverManager.getConnection(URL, userName, password);
@@ -81,6 +106,12 @@ public class DataBase {
         }
     }
 
+    /**
+     *@param    currentState    Текущее состояние машины Тьюринга.
+     *@param    currentSymbol   Текущий символ на ленте машины Тьюринга.
+     *@return   Следующее состояние, в которое должна перейти машина Тьюринга.
+     *@throws   SQLException    Исключение, обрабатываещее ошибки с подключением к базе данных.
+     */
     public TuringMachine.State getNextState(String currentState, String currentSymbol) throws SQLException {
         String rawState = stringGetNextState(currentState, currentSymbol);
         switch (rawState){
@@ -100,6 +131,13 @@ public class DataBase {
         }
     }
 
+    /**
+     * Выводит описание указанного правила.
+     *@param    currentState    Текущее состояние машины Тьюринга.
+     *@param    currentSymbol   Текущий символ на ленте машины Тьюринга.
+     *@return   Описание правила, которое выполняется машиной Тьюринга в текущий момент.
+     *@throws   SQLException    Исключение, обрабатываещее ошибки с подключением к базе данных.
+     */
     public String getRule(String currentState, String currentSymbol) throws SQLException {
         String processedDirection = "remain in place";
         if(getDirection(currentState, currentSymbol) == "Left"){
@@ -113,6 +151,10 @@ public class DataBase {
         return  processedRule;
     }
 
+    /**
+     *Добавляет правило интерпретации в таблицу правил в базе данных.
+     *@throws   SQLException    Исключение, обрабатываещее ошибки с подключением к базе данных.
+     */
     public void insertRule() throws SQLException {
 
         System.out.println("Attention! You are adding a rule\n Please, enter right data");
@@ -141,6 +183,11 @@ public class DataBase {
         System.out.println("Data has been successfully added\n");
     }
 
+    /**
+    *Удаляет правило из таблицы правил в базе данных.
+    *@param    numberOfRule    Порядковый номер правила из таблцы правил в базе данных.
+     *@throws   SQLException   Исключение, обрабатываещее ошибки с подключением к базе данных.
+     */
     public void removeRule(int numberOfRule) throws SQLException {
         if(isConnectable){
             connection = DriverManager.getConnection(URL, userName, password);
@@ -150,6 +197,15 @@ public class DataBase {
         }
     }
 
+    /**
+    *Изменяет выбранное правило в таблице правил в базе данных
+    * @param    numberOfRule    Порядковый номер правила из таблицы правил в базе данных.
+    * @param    newCurrentState    Новое значение поля current_state в базе данных.
+    * @param    newCurrentValue    Новое значение поля current_value в базе данных.
+    * @param    newNextValue    Новое значение для поля next_value.
+    * @param    newDirection    Новое значеие для поля direction.
+     * @throws     SQLException    Исключение, обрабатываещее ошибки с подключением к базе данных.
+     */
     public void changeRule(int numberOfRule, String newCurrentState, String newCurrentValue, String newNextValue, String newDirection) throws SQLException {
         if(isConnectable){
             connection = DriverManager.getConnection(URL, userName, password);
@@ -163,6 +219,10 @@ public class DataBase {
         }
     }
 
+    /**
+     * Выводит на экран всю таблицу с правилами.
+     * @throws SQLException
+     */
     public void showRules() throws SQLException {
         if(isConnectable){
             connection = DriverManager.getConnection(URL, userName, password);
