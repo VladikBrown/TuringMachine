@@ -15,7 +15,7 @@ public class DataBase {
     private static final String INSERT_RULE = "insert into turing_machine_rules.rules(*) values (?, ?, ?, ?)";
     private static final String DELETE_RULE = "delete from turing_machine_rules.rules where row_count = ?";
     private static final String UPDATE_RULE = "UPDATE turing_machine_rules.rules where row_count  = ? SET current_state = ?, current_value = ?, next_state = ?, direction ?";
-    private static final String SELECT_ALL_RULES = "UPDATE turing_machine_rules.rules where row_count  = ? SET current_state = ?, current_value = ?, next_state = ?, direction ?";
+    private static final String SELECT_ALL_RULES = "select * from turing_machine_rules.rules";
 
     private static final String COLUMNNAME_CURRENT_STATE = "current_state";
     private static final String COLUMNNAME_CURRENT_SYMBOL = "current_symbol";
