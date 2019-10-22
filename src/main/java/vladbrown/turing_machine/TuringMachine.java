@@ -20,7 +20,6 @@ import java.util.Scanner;
  */
 public class TuringMachine {
 
-
     private static DataBase dataBase;
     private boolean wasLogGiven = false;
     private String textFolder;
@@ -34,7 +33,7 @@ public class TuringMachine {
      * @see DataBase
      */
     public TuringMachine(String[] args) throws NoSuchMethodException, IllegalAccessException, InstantiationException, SQLException, InvocationTargetException, ClassNotFoundException {
-        DataBase dataBase = new DataBase("jdbc:mysql://localhost:3306/turing_machine_rules?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", "root", "9098");
+        this.dataBase = new DataBase("jdbc:mysql://localhost:3306/turing_machine_rules?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", "root", "9098");
         this.textFolder = args[0];
         if(args[1].equals("-log")){ this.wasLogGiven = true;}
     }

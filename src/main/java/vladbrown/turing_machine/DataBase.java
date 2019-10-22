@@ -138,7 +138,10 @@ public class DataBase {
      *@return   Описание правила, которое выполняется машиной Тьюринга в текущий момент.
      *@throws   SQLException    Исключение, обрабатываещее ошибки с подключением к базе данных.
      */
-    public String getRule(String currentState, String currentSymbol) throws SQLException {
+    public String getDescriptionOfRule(String currentState, String currentSymbol) throws SQLException {
+        if(currentState.equals("q0")){
+            return "This is deafault rule";
+        }
         String processedDirection = "remain in place";
         if(getDirection(currentState, currentSymbol) == "Left"){
             processedDirection = "move to the Left";
