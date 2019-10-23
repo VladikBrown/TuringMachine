@@ -248,7 +248,7 @@ public class TuringMachine {
     *Класс {@link Box} - это ячейка "ленты" {@link Tape}, в которой хранятся данные.
     * Содержит поле symbol для хранения значение ячейки.
      */
-    private static class Box {
+    static class Box {
 
         private String symbol;
 
@@ -279,7 +279,7 @@ public class TuringMachine {
     * Содержит поле tape - список объектов класса {@link Box} и поле
     * it - интератор, перемещающийся по "ленте", передаваемый в другие классы для сохранения позиции каретки.
     */
-    private class Tape {
+    class Tape {
 
         private LinkedList<Box> tape;
         private ListIterator<Box> it;
@@ -332,7 +332,7 @@ public class TuringMachine {
     *Содержит поле it, которое хранит положение "каретки", поле current_element, для доступа к значению текущей ячейки
     * и методы, для перемещения "каретки" и манипуляции данными.
      */
-     private class Head {
+    class Head {
 
         private ListIterator<Box> it;
         private Box current_element;
@@ -350,7 +350,7 @@ public class TuringMachine {
         *Перемещает каретку на одно положение влево или вправо(или оставляет на месте).
         * @param    direction   Направление по которому необходимо переместить каретку
          */
-        private void move(String direction)
+        void move(String direction)
         {
             if(direction.equals("Left"))
             {
@@ -379,7 +379,7 @@ public class TuringMachine {
         *Заменяет значение текущей ячейки на новое, переданно как параметр метода.
         * @param    new_symbol   новое значение ячейки, на которое заменяется текущее
          */
-        private void change(String new_symbol){
+        void change(String new_symbol){
             this.it.set(new Box(new_symbol));
         }
 
