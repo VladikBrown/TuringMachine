@@ -81,8 +81,10 @@ public class TuringMachine {
                     }
                     case 4: {
                         dataBase.showRules();
-                        System.out.println("Enter number of rule to change");
-                        int ruleToChange = in.nextInt();
+                        System.out.println("Enter value of field \"current_state\" of rule that must be changed");
+                        String current_stateToRemove = in.next();
+                        System.out.println("Enter value of field \"current_symbol\" of rule that must be removed");
+                        String current_symbolToRemove = in.next();
                         System.out.println("Enter new current state. For example \"q1\" means state 1");
                         String newCurrentState = in.next();
                         System.out.println("Enter new current symbol. For example \"(\"");
@@ -91,16 +93,17 @@ public class TuringMachine {
                         String newNextState = in.next();
                         System.out.println("Enter new direction. \"Right\" - to move head right, \"Left\" - to move head left, \"Stay\" - to not move head");
                         String newDirection = in.next();
-                        dataBase.changeRule(ruleToChange, newCurrentState, newCurrentSymbol, newNextState, newDirection );
+                        dataBase.changeRule(current_stateToRemove, current_symbolToRemove, newCurrentState, newCurrentSymbol, newNextState, newDirection );
                         System.out.println("Rule was changed\n");
                         break;
                     }
                     case 5: {
                         dataBase.showRules();
-                        System.out.println("Enter number of rule to remove");
-                        int ruleToRemove = in.nextInt();
-                        dataBase.removeRule(ruleToRemove);
-                        System.out.println("Rule number " + ruleToRemove + "was successfully removed");
+                        System.out.println("Enter value of field \"current_state\" of rule that must be removed");
+                        String current_stateToRemove = in.next();
+                        System.out.println("Enter value of field \"current_symbol\" of rule that must be removed");
+                        String current_symbolToRemove = in.next();
+                        dataBase.removeRule(current_stateToRemove, current_symbolToRemove);
                         break;
                     }
                     case 6: {
@@ -279,7 +282,7 @@ public class TuringMachine {
     * Содержит поле tape - список объектов класса {@link Box} и поле
     * it - интератор, перемещающийся по "ленте", передаваемый в другие классы для сохранения позиции каретки.
     */
-    class Tape {
+    static class Tape {
 
         private LinkedList<Box> tape;
         private ListIterator<Box> it;
@@ -332,10 +335,11 @@ public class TuringMachine {
     *Содержит поле it, которое хранит положение "каретки", поле current_element, для доступа к значению текущей ячейки
     * и методы, для перемещения "каретки" и манипуляции данными.
      */
-    class Head {
+    static class Head {
 
         private ListIterator<Box> it;
         private Box current_element;
+        private Tape current_tape;
 
         /**
          *Конструктор класса Head{@code Head}
@@ -343,6 +347,7 @@ public class TuringMachine {
          */
         Head(Tape objectTape)
         {
+            this.current_tape = objectTape;
             this.it = objectTape.it;
         }
 
@@ -386,15 +391,23 @@ public class TuringMachine {
         /**
         *Зачищает текущую ячейку.
          */
-        private void clear(){
+        void clear(){
             this.it.set(new Box("."));
         }
 
         /**
         *@return    Значение текущей ячейки.
          */
-        private String current_value(){
+        public String getCurrentValue(){
             return this.current_element.getValue();
+        }
+
+        /**
+         *Возвращает каретку в начальную позициую и обновляет значения ленты.
+         *Этот метод должен быть вызван, если вы собираетесь работать с лентой после изменения её значений.
+         */
+        public void update(){
+            this.it = current_tape.tape.listIterator(0);
         }
     }
 }

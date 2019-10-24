@@ -1,9 +1,6 @@
 package vladbrown.turing_machine;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.*;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
@@ -12,82 +9,107 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static jdk.vm.ci.sparc.SPARC.q0;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataBaseTest {
+    public static final String userName = "root";
+    public static final String password = "9098";
+    public static final String connectionURL = "jdbc:mysql://localhost:3306/turing_machine_rules?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
 
-    private Connection connection;
-    private Statement statement;
-    DataBase dataBase;
 
-    @BeforeClass
-    void prepareToTestDataBase() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        dataBase = new DataBase("jdbc:mysql://localhost:3306/turing_machine_rules?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", "root", "9098");
-        String userName = "root";
-        String password = "9098";
-        String connectionURL = "jdbc:mysql://localhost:3306/turing_machine_rules?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
-        Class.forName("com.mysql.cj.jdbc.Driver").getDeclaredConstructor().newInstance();
-        try (Connection connection = DriverManager.getConnection(connectionURL, userName, password);
-             Statement statement = connection.createStatement()) {
-            this.statement = connection.createStatement();
-            this.connection = connection;
-        } catch (SQLException e) {
+    private static Connection connection;
+    private static DataBase dataBase;
+
+    static {
+        try {
+            dataBase = new DataBase("jdbc:mysql://localhost:3306/turing_machine_rules?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", "root", "9098");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
             e.printStackTrace();
         }
     }
 
-    @AfterClass void finishTestDataBase() throws SQLException {
-        this.connection.close();
-        this.statement.close();
+
+    public void prepareTestGetDirection() throws SQLException {
+        connection = DriverManager.getConnection(connectionURL, userName, password);
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("insert into turing_machine_rules.rules values ('test_q0','A','q4','right_direction')");
     }
 
-    @Before
-    void prepareTestGetDirection() throws SQLException {
-        this.statement.executeUpdate("insert into turing_machine_rules.rules(*) values ('q0','A','q4','right_direction')");
-    }
-    @After
-    void finishTestGetDirection() throws SQLException {
-        this.statement.executeUpdate("delete from turing_machine_rules.rules where current_state = 'q0' and current_value = 'A'");
+    public void finishTestGetDirection() throws SQLException {
+        connection = DriverManager.getConnection(connectionURL, userName, password);
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("delete from turing_machine_rules.rules where current_state = 'test_q0' and current_value = 'A'");
     }
     @Test
-    void getDirection() throws SQLException {
-        assertEquals("expected direction is right_direction", "right_direction", dataBase.getDirection("q0","A"));
+    public void getDirection() throws SQLException {
+        prepareTestGetDirection();
+        assertEquals("right_direction", dataBase.getDirection("test_q0","A"));
+        finishTestGetDirection();
     }
 
-    @Before
-    void prepareTestGetNextState() throws SQLException {
-        this.statement.executeUpdate("insert into turing_machine_rules.rules(*) values ('q0','A','right_next_state','test_direction')");
+
+    public void prepareTestStringGetNextState() throws SQLException {
+        connection = DriverManager.getConnection(connectionURL, userName, password);
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("insert into turing_machine_rules.rules values ('q0','A','right_next_state','test_direction')");
     }
-    @After
-    void finishTestGetNextState() throws SQLException {
-        this.statement.executeUpdate("delete from turing_machine_rules.rules where current_state = 'q0' and current_value = 'A'");
+
+    public void finishTestStringGetNextState() throws SQLException {
+        connection = DriverManager.getConnection(connectionURL, userName, password);
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("delete from turing_machine_rules.rules where current_state = 'q0' and current_value = 'A'");
     }
     @Test
-    void stringGetNextState() throws SQLException {
-        assertEquals("expected right_next_direction", "right_next_direction", dataBase.stringGetNextState("q0", "A"));
+    public void stringGetNextState() throws SQLException {
+        prepareTestStringGetNextState();
+        assertEquals("right_next_state",  dataBase.stringGetNextState("q0", "A"));
+        finishTestStringGetNextState();
+    }
+
+    public void prepareTestChangeRule() throws SQLException {
+        connection = DriverManager.getConnection(connectionURL, userName, password);
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("insert into turing_machine_rules.rules values ('1','2','3','4')");
+    }
+
+    public void finishTestChangeRule() throws SQLException {
+        connection = DriverManager.getConnection(connectionURL, userName, password);
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("delete from turing_machine_rules.rules where current_state = '1+' and current_value = '2+'");
+    }
+    @Test
+    public void changeRule() throws SQLException {
+        prepareTestChangeRule();
+        dataBase.changeRule("1", "2", "1+", "2+", "3+", "4+");
+        finishTestChangeRule();
     }
 
     @Test
-    void getNextState() {
+    void insertRule() throws SQLException {
+        connection = DriverManager.getConnection(connectionURL, userName, password);
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("insert into turing_machine_rules.rules values ('insertTest_1','insertTest_2','testInsert_next_state','testInsert_direction')");
+        assertEquals("testInsert_next_state", dataBase.stringGetNextState("insertTest_1","insertTest_2"));
+        assertEquals("testInsert_direction", dataBase.getDirection("insertTest_1","insertTest_2"));
+        statement.executeUpdate("delete from turing_machine_rules.rules where current_state = 'insertTest_1' and current_value = 'insertTest_2'");
     }
 
     @Test
-    void getDescriptionOfRule() {
-    }
-
-    @Test
-    void insertRule() {
-    }
-
-    @Test
-    void removeRule() {
-    }
-
-    @Test
-    void changeRule() {
-    }
-
-    @Test
-    void showRules() {
+    void removeRule() throws SQLException {
+        connection = DriverManager.getConnection(connectionURL, userName, password);
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("insert into turing_machine_rules.rules values ('removeTest_1','removeTest_2','tesRemove_next_state','testRemove_direction')");
+        assertEquals("testRemove_direction", dataBase.getDirection("removeTest_1","removeTest_2"));
+        dataBase.removeRule("removeTest_1","removeTest_2");
+        assertNull(dataBase.getDirection("removeTest_1","removeTest_2"));
     }
 }

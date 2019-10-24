@@ -12,9 +12,9 @@ import java.util.Scanner;
 public class DataBase {
     private static final String SELECT_DIRECTION = "select direction from turing_machine_rules.rules where current_state = ? and current_value = ?";
     private static final String SELECT_NEXT_STATE = "select next_state from turing_machine_rules.rules where current_state = ? and current_value = ?";
-    private static final String INSERT_RULE = "insert into turing_machine_rules.rules(*) values (?, ?, ?, ?)";
-    private static final String DELETE_RULE = "delete from turing_machine_rules.rules where row_count = ?";
-    private static final String UPDATE_RULE = "UPDATE turing_machine_rules.rules where row_count  = ? SET current_state = ?, current_value = ?, next_state = ?, direction ?";
+    private static final String INSERT_RULE = "insert into turing_machine_rules.rules values (?, ?, ?, ?)";
+    private static final String DELETE_RULE = "delete from turing_machine_rules.rules where current_state = ? and current_value = ?";
+    private static final String UPDATE_RULE = "UPDATE turing_machine_rules.rules SET current_state = ?, current_value = ?, next_state = ?, direction = ? WHERE current_state = ? and current_value = ?";
     private static final String SELECT_ALL_RULES = "select * from turing_machine_rules.rules";
 
     private static final String COLUMNNAME_CURRENT_STATE = "current_state";
@@ -143,14 +143,14 @@ public class DataBase {
             return "This is deafault rule";
         }
         String processedDirection = "remain in place";
-        if(getDirection(currentState, currentSymbol) == "Left"){
+        if(getDirection(currentState, currentSymbol).equals("Left")){
             processedDirection = "move to the Left";
         }
-        else if (getDirection(currentState, currentSymbol) == "Right"){
+        else if (getDirection(currentState, currentSymbol).equals("Right")){
             processedDirection = "move to the Right";
         }
-        String processedRule = "If current state is " + currentState + "and current symbol is " + currentSymbol +
-                "then head should " + processedDirection + " and go into the State: " + stringGetNextState(currentState, currentSymbol);
+        String processedRule = "If current State is " + currentState + " and current Symbol is " + currentSymbol +
+                " then Head should " + processedDirection + " and go into the State: " + stringGetNextState(currentState, currentSymbol);
         return  processedRule;
     }
 
@@ -172,7 +172,7 @@ public class DataBase {
         String current_symbol = in.next();
         System.out.println("Enter next state in format: q%, where % - number of state\n");
         String next_state = in.next();
-        System.out.println("Enter direction of movement: R means Right, L means Left, S - means remaining in current place\n" );
+        System.out.println("Enter direction of movement: Right, Left, Stay - means remaining in current place\n" );
         String direction = in.next();
         if (isConnectable) {
             connection = DriverManager.getConnection(URL, userName, password);
@@ -188,36 +188,40 @@ public class DataBase {
 
     /**
     *Удаляет правило из таблицы правил в базе данных.
-    *@param    numberOfRule    Порядковый номер правила из таблцы правил в базе данных.
+    *@param    current_state    Значение поля current_state для выбранного правила.
+     * @param  current_symbol    Значение поля current_symbol для выбранного правила.
      *@throws   SQLException   Исключение, обрабатываещее ошибки с подключением к базе данных.
      */
-    public void removeRule(int numberOfRule) throws SQLException {
+    public void removeRule(String current_state, String current_symbol) throws SQLException {
         if(isConnectable){
             connection = DriverManager.getConnection(URL, userName, password);
             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_RULE);
-            preparedStatement.setInt(1, numberOfRule);
+            preparedStatement.setString(1, current_state);
+            preparedStatement.setString(2, current_symbol);
             preparedStatement.executeUpdate();
         }
     }
 
     /**
     *Изменяет выбранное правило в таблице правил в базе данных
-    * @param    numberOfRule    Порядковый номер правила из таблицы правил в базе данных.
-    * @param    newCurrentState    Новое значение поля current_state в базе данных.
+    **@param    current_state    Значение поля current_state для выбранного правила.
+     *@param  current_symbol    Значение поля current_symbol для выбранного правила.
+     * @param    newCurrentState    Новое значение поля current_state в базе данных.
     * @param    newCurrentValue    Новое значение поля current_value в базе данных.
     * @param    newNextValue    Новое значение для поля next_value.
     * @param    newDirection    Новое значеие для поля direction.
      * @throws     SQLException    Исключение, обрабатываещее ошибки с подключением к базе данных.
      */
-    public void changeRule(int numberOfRule, String newCurrentState, String newCurrentValue, String newNextValue, String newDirection) throws SQLException {
+    public void changeRule(String current_state, String current_symbol, String newCurrentState, String newCurrentValue, String newNextValue, String newDirection) throws SQLException {
         if(isConnectable){
             connection = DriverManager.getConnection(URL, userName, password);
             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_RULE);
-            preparedStatement.setInt(1, numberOfRule);
-            preparedStatement.setString(2, newCurrentState);
-            preparedStatement.setString(3, newCurrentValue);
-            preparedStatement.setString(4, newNextValue);
-            preparedStatement.setString(5, newDirection);
+            preparedStatement.setString(1, newCurrentState);
+            preparedStatement.setString(2, newCurrentValue);
+            preparedStatement.setString(3, newNextValue);
+            preparedStatement.setString(4, newDirection);
+            preparedStatement.setString(5, current_state);
+            preparedStatement.setString(6, current_symbol);
             preparedStatement.executeUpdate();
         }
     }
@@ -231,11 +235,13 @@ public class DataBase {
             connection = DriverManager.getConnection(URL, userName, password);
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery(SELECT_ALL_RULES);
+            System.out.println("  current_state" + "  \tcurrent_symbol" + "\t\tnext_state" + "\t\t\tdirection");
+            System.out.println("---------------------------------------------------------------------------------");
             int index = 1;
             while (resultSet.next()){
                 System.out.print(index++ + ". ");
-                for (int i = 1; i <= 4; i++){
-                    System.out.print(resultSet.getString(i) + "\t");
+                for(int i = 1; i <= 4; i++){
+                    System.out.print(resultSet.getString(i) + "\t\t\t|\t\t");
                 }
                 System.out.println("\n");
             }
