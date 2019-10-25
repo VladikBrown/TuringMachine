@@ -1,14 +1,12 @@
 package vladbrown.turing_machine;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -87,7 +85,7 @@ class TuringMachineTest {
                 head.move("Right");
                 head.change("changed");
             }
-            head.update();
+            head.updateTape();
             for (int i = 0; i < 5; i++) {
                 head.move("Right");
                 assertEquals("changed", head.getCurrentValue());
@@ -104,7 +102,7 @@ class TuringMachineTest {
                 head.move("Right");
                 head.clear();
             }
-            head.update();
+            head.updateTape();
             for (int i = 0; i < 5; i++) {
                 head.move("Right");
                 assertEquals(".", head.getCurrentValue());

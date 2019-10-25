@@ -9,7 +9,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static jdk.vm.ci.sparc.SPARC.q0;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataBaseTest {
@@ -25,14 +24,6 @@ class DataBaseTest {
         try {
             dataBase = new DataBase("jdbc:mysql://localhost:3306/turing_machine_rules?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", "root", "9098");
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
             e.printStackTrace();
         }
     }
@@ -89,7 +80,7 @@ class DataBaseTest {
     @Test
     public void changeRule() throws SQLException {
         prepareTestChangeRule();
-        dataBase.changeRule("1", "2", "1+", "2+", "3+", "4+");
+        dataBase.changeRule(1, "1+", "2+", "3+", "4+");
         finishTestChangeRule();
     }
 
@@ -109,7 +100,7 @@ class DataBaseTest {
         Statement statement = connection.createStatement();
         statement.executeUpdate("insert into turing_machine_rules.rules values ('removeTest_1','removeTest_2','tesRemove_next_state','testRemove_direction')");
         assertEquals("testRemove_direction", dataBase.getDirection("removeTest_1","removeTest_2"));
-        dataBase.removeRule("removeTest_1","removeTest_2");
+        dataBase.removeRule(1);
         assertNull(dataBase.getDirection("removeTest_1","removeTest_2"));
     }
 }
