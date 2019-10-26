@@ -212,6 +212,8 @@ public class TuringMachine {
     }
 
     /**
+     * {@link State}
+     *
      * @see vladbrown.turing_machine.TuringMachine.State
      */
     static class State_2 extends State {
@@ -236,6 +238,8 @@ public class TuringMachine {
     }
 
     /**
+     * {@link State}
+     *
      * @see vladbrown.turing_machine.TuringMachine.State
      */
     static class State_3 extends State {
