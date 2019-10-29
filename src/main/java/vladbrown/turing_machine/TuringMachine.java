@@ -300,7 +300,7 @@ public class TuringMachine {
 
         @Override
         public String toString() {
-            return "" + symbol;
+            return symbol;
         }
     }
 
@@ -385,24 +385,24 @@ public class TuringMachine {
          * @param direction Направление по которому необходимо переместить каретку
          */
         void move(String direction) {
-            if (direction.equals("error")) {
+            if ("error".equals(direction)) {
                 System.out.println("Program hasn't enough instructions to work correctly and will be stopped!");
                 return;
             }
-            if (direction.equals("Left")) {
+            if ("Left".equals(direction)) {
                 if (this.it.hasPrevious()) {
                     this.currentElement = this.it.previous();
                     this.currentElement = this.it.previous();
                 } else System.out.println("Head in the extreme left position!");
             }
 
-            if (direction.equals("Right")) {
+            if ("Right".equals(direction)) {
                 if (this.it.hasNext()) {
                     this.currentElement = this.it.next();
                 } else System.out.println("Head in the extreme right position!");
             }
 
-            if (direction.equals("Stay")) {
+            if ("Stay".equals(direction)) {
                 System.out.println("Head didn't move!\n");
             }
         }
@@ -412,8 +412,7 @@ public class TuringMachine {
          *
          * @param newSymbol новое значение ячейки, на которое заменяется текущее
          */
-        void change(String newSymbol) {
-            this.it.set(new Box(newSymbol));
+        void change(String newSymbol) { this.it.set(new Box(newSymbol));
         }
 
         /**
