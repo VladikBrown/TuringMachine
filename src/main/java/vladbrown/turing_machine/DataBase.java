@@ -33,7 +33,7 @@ public class DataBase {
     private Connection connection;
     private String URL, userName, password;
     private boolean isConnectable = false;
-
+    // можно реализовать через синглтон
     /**
      * Устанавливается соединение с базой данных.
      *
